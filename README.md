@@ -14,7 +14,7 @@ First clone locally this repository
 Then navigate to one of the example folders and install dependencies
 
 	cd skale-examples/wordcount
-	npm install	# to create dependencies
+	npm install
 
 Finally, run the sample app
 	
