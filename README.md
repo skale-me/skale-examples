@@ -20,3 +20,9 @@ Finally, run the sample app
 	
 	skale run
 
+### Examples
+#### wordcount
+Compute the number of occurence of each word of james joyce's Ulysse.
+
+##### pi
+Compute pi by throwing darts on the unit circle.
