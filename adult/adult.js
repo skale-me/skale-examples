@@ -60,50 +60,49 @@ var test_set = sc.textFile('adult.test')
 	.filter(data => data.indexOf('?') == -1)					// remove incomplete data
 	.map(featurize, metadata);									// transform string data to number
 
-// Wrap asynchronous code in co to limit callback imbrications (ES7 async/await will fix this !)
-co(function* () {
-	// Standardize features to zero mean and unit variance
-	var scaler = new StandardScaler();
+training_set.collect().on('data', console.log).on('end', sc.end)
 
-	yield scaler.fit(training_set.map(point => point[1]));			// async !!
+// // Wrap asynchronous code in co to limit callback imbrications (ES7 async/await will fix this !)
+// co(function* () {
+// 	// Standardize features to zero mean and unit variance
+// 	var scaler = new StandardScaler();
 
-	// Use scaler to standardize training and test datasets
-	var training_set_std = training_set
-		.map((p, args) => [p[0], args.scaler.transform(p[1])], {scaler: scaler})
-		.persist();
+// 	yield scaler.fit(training_set.map(point => point[1]));			// async !!
 
-	var test_set_std = test_set
-		.map((p, args) => [p[0], args.scaler.transform(p[1])], {scaler: scaler});
+// 	// Use scaler to standardize training and test datasets
+// 	var training_set_std = training_set.map((p, scaler) => [p[0], scaler.transform(p[1])], scaler).persist();
 
-	// Train logistic regression with SGD on standardized training set
-	var nIterations = 10;
-	var parameters = {regParam: 0.01, stepSize: 1};
-	var model = new LogisticRegressionWithSGD(training_set_std, parameters);
+// 	var test_set_std = test_set.map((p, scaler) => [p[0], scaler.transform(p[1])], scaler);
 
-	yield model.train(nIterations);									// async !!
+// 	// Train logistic regression with SGD on standardized training set
+// 	var nIterations = 10;
+// 	var parameters = {regParam: 0.01, stepSize: 1};
+// 	var model = new LogisticRegressionWithSGD(training_set_std, parameters);
 
-	// Evaluate classifier performance on standardized test set
-	var predictionAndLabels = test_set_std.map((p, args) => [args.model.predict(p[1]), p[0]], {model: model});
-	var metrics = new BinaryClassificationMetrics(predictionAndLabels);
+// 	yield model.train(nIterations);									// async !!
 
-	console.log('\n# Receiver Operating characteristic (ROC)')
-	var roc = yield metrics.roc();
-	console.log('\nThreshold\tSpecificity(FPR)\tSensitivity(TPR)')
-	for (var i in roc)
-		console.log(roc[i][0].toFixed(2) + '\t' + roc[i][1][0].toFixed(2) + '\t' + roc[i][1][1].toFixed(2));
+// 	// Evaluate classifier performance on standardized test set
+// 	var predictionAndLabels = test_set_std.map((p, model) => [model.predict(p[1]), p[0]], model);
+// 	var metrics = new BinaryClassificationMetrics(predictionAndLabels);
 
-	// Ploting ROC curve as roc.png
-	var xy = {};
-	for (var i in roc)
-		xy[roc[i][1][0].toFixed(2)] = roc[i][1][1].toFixed(2)
-	xy['0.00'] = '0.00';
-	var data = {};
-	data['regParam: ' + parameters.regParam + ', stepSize: ' + parameters.stepSize] = xy;
-	data['Random'] = {0 :0, 1 : 1};
-	plot({
-		title: 'Logistic Regression ROC Curve', 
-		data: data, 
-		filename: 'roc.png',
-		finish: function() {sc.end();}
-	});
-});
+// 	console.log('\n# Receiver Operating characteristic (ROC)')
+// 	var roc = yield metrics.roc();
+// 	console.log('\nThreshold\tSpecificity(FPR)\tSensitivity(TPR)')
+// 	for (var i in roc)
+// 		console.log(roc[i][0].toFixed(2) + '\t' + roc[i][1][0].toFixed(2) + '\t' + roc[i][1][1].toFixed(2));
+
+// 	// Ploting ROC curve as roc.png
+// 	var xy = {};
+// 	for (var i in roc)
+// 		xy[roc[i][1][0].toFixed(2)] = roc[i][1][1].toFixed(2)
+// 	xy['0.00'] = '0.00';
+// 	var data = {};
+// 	data['regParam: ' + parameters.regParam + ', stepSize: ' + parameters.stepSize] = xy;
+// 	data['Random'] = {0 :0, 1 : 1};
+// 	plot({
+// 		title: 'Logistic Regression ROC Curve', 
+// 		data: data, 
+// 		filename: 'roc.png',
+// 		finish: function() {sc.end();}
+// 	});
+// });
