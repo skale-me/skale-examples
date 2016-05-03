@@ -7,6 +7,7 @@ sc.textFile(__dirname + '/james_joyce_ulysse.txt')
 	.map(word => [word, 1])
 	.reduceByKey((a, b) => a + b, 0)
 	.sortByKey()
-	.collect()
-	.on('data', console.log)
-	.on('end', sc.end)
+	.collect(function(err, result) {
+		console.log(result);
+		sc.end();
+	})

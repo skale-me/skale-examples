@@ -15,7 +15,7 @@ DataFrame.prototype.show = thenify(function(n, done) {
 
 	function show() {
 		var table = new Table({head: self.fields, colWidths: self.fields.map(n => 12)});
-		self.dataset.take(n).toArray(function(err, result) {
+		self.dataset.take(n).then(function(result) {
 			result.map(d => table.push(d));
 			console.log(table.toString());
 			done(null);
@@ -50,7 +50,7 @@ DataFrame.prototype.extractSchema = thenify(function(done) {
 		return schema1;
 	}
 
-	this.dataset.aggregate(reducer, combiner, schema).on('data', function(schema) {
+	this.dataset.aggregate(reducer, combiner, schema).then(function(schema) {
 		for (var i in schema) self.schema[i] = schema[i];	// apply schema
 		done(null, schema);
 	})
@@ -63,7 +63,7 @@ DataFrame.prototype.describe = thenify(function(field, done) {
 	var idx = this.fields.indexOf(field);
 	this.dataset.map((data, idx) => data[idx], idx)
 		.map(function(feature) {return isNaN(Number(feature)) ? feature : Number(feature);})
-		.countByValue().toArray(function(err, tmp) {
+		.countByValue().then(function(tmp) {
 			if (isNaN(Number(tmp[0][0]))) {					// Discrete feature
 				tmp.sort(function(a, b) {return b[1] - a[1]});	// Sort descent
 				var xy = [];
@@ -200,7 +200,7 @@ DataFrame.prototype.toLabeledPoint = function(label, features) {
 }
 
 DataFrame.prototype.take = thenify(function(n, done) {
-	this.dataset.take(n).toArray(done);
+	this.dataset.take(n, done);
 });
 
 function CSVDataFrame(sc, fields, file, sep, na_values) {
