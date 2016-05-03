@@ -68,12 +68,9 @@ co(function* () {
 	yield scaler.fit(training_set.map(point => point[1]));			// async !!
 
 	// Use scaler to standardize training and test datasets
-	var training_set_std = training_set
-		.map((p, args) => [p[0], args.scaler.transform(p[1])], {scaler: scaler})
-		.persist();
+	var training_set_std = training_set.map((p, scaler) => [p[0], scaler.transform(p[1])], scaler).persist();
 
-	var test_set_std = test_set
-		.map((p, args) => [p[0], args.scaler.transform(p[1])], {scaler: scaler});
+	var test_set_std = test_set.map((p, scaler) => [p[0], scaler.transform(p[1])], scaler);
 
 	// Train logistic regression with SGD on standardized training set
 	var nIterations = 10;
@@ -83,7 +80,7 @@ co(function* () {
 	yield model.train(nIterations);									// async !!
 
 	// Evaluate classifier performance on standardized test set
-	var predictionAndLabels = test_set_std.map((p, args) => [args.model.predict(p[1]), p[0]], {model: model});
+	var predictionAndLabels = test_set_std.map((p, model) => [model.predict(p[1]), p[0]], model);
 	var metrics = new BinaryClassificationMetrics(predictionAndLabels);
 
 	console.log('\n# Receiver Operating characteristic (ROC)')

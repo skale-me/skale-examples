@@ -1,2 +1,4 @@
 node_modules
 skale-server.log
+.ipynb_checkpoints/
+*.png

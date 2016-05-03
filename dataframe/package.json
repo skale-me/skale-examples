@@ -1,14 +1,16 @@
 {
-  "name": "adult",
+  "name": "dataframe",
   "version": "0.0.0",
   "private": true,
   "keywords": [
     "skale"
   ],
   "dependencies": {
+    "cli-table": "^0.3.1",
     "co": "^4.6.0",
     "plotter": "^0.5.0",
     "skale-engine": "^0.5.0",
-    "skale-ml": "^0.2.0"
+    "skale-ml": "^0.2.0",
+    "thenify": "^3.2.0"
   }
 }
