@@ -17,34 +17,36 @@ co(function* () {
 		"Occupation", "Relationship", "Race", "Sex", "Capital-Gain", "Capital-Loss", 
 		"Hours-per-week", "Country", "Target"
 	];
-	var frame = new CSVDataFrame(sc, fields, 'adult.data', ',', '?');
-	yield frame.take(15);
+	var df = new CSVDataFrame(sc, fields, 'adult.data', ',', '?');
+	yield df.show(10);
+
+	// console.log(JSON.stringify(yield df.extractSchema(), null, 4)) ;
 
 	console.log('\n# Generate features distribution as png files')
-	for (var i in frame.fields)
-		yield frame.distribution(frame.fields[i]);
+	for (var i in df.fields)
+		yield df.describe(df.fields[i]);
 
-	// console.log('\n# Show country distribution as percentage');
-	// yield frame.select2('Country', 10);
+	// // console.log('\n# Show country distribution as percentage');
+	// // yield frame.select2('Country', 10);
 
-	console.log('\n# Encode the categorical features');
-	var encoded_frame = frame.number_encode_features();				// c'est pas asynchrone ça !!
-	yield encoded_frame.take(15)
+	console.log('\n# Encode the categorical features');	
+	var edf = df.number_encode_features();
+	yield edf.show(10)
 
 	// console.log('\n TODO: Observe correlation between all features');
 
 	console.log('\n# Correlation between Education and Education-Num');
-	yield frame.select(["Education", "Education-Num"]).take(15);
+	yield df.select(["Education", "Education-Num"]).show(10);
 
 	console.log('\n# Delete Education field from data frame');
-	encoded_frame = encoded_frame.delete(["Education"]);
-	yield encoded_frame.take(15)
+	edf = edf.drop(["Education"]);
+	yield edf.show(15)
 
 	console.log('\n# Correlation between Sex and Relationship');
-	yield frame.select(["Sex", "Relationship"]).take(15);
+	yield df.select(["Sex", "Relationship"]).show(10);
 
 	console.log('# Extract a LabeledPoint Dataset from our encoded Data Frame');
-	var training_set = encoded_frame.toLabeledPoint("Target", ["*"]);
+	var training_set = edf.toLabeledPoint("Target", ["*"]);
 
 	console.log('# Scale features to zero-mean, unit variance')
 	var scaler = new StandardScaler();
@@ -60,8 +62,18 @@ co(function* () {
 	yield model.train(nIterations);
 
 	console.log('\n# Cross validate on test set and generate ROC curve')
-	var predictionAndLabels = training_set_std.map((p, model) => [model.predict(p[1]), p[0]], model);
+	var vdf = new CSVDataFrame(sc, fields, 'adult.test', ',', '?');
+	var evdf = vdf.drop(["Education"]).number_encode_features();
+	var test_set_std = evdf
+		.toLabeledPoint("Target", ["*"])
+		.map((p, scaler) => [p[0], scaler.transform(p[1])], scaler);
+
+	// var predictionAndLabels = training_set_std.map((p, model) => [model.predict(p[1]), p[0]], model);
+	var predictionAndLabels = test_set_std.map((p, model) => [model.predict(p[1]), p[0]], model);			// inverse label
 	var metrics = new BinaryClassificationMetrics(predictionAndLabels);
+	// var f1score = yield metrics.fMeasureByThreshold(1);
+	// console.log(f1score)
+
 	var roc = yield metrics.roc();
 	var xy = {};
 	for (var i in roc) xy[roc[i][1][0].toFixed(2)] = roc[i][1][1].toFixed(2);
