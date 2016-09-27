@@ -2,7 +2,7 @@
 
 var sc = require('skale-engine').context();
 
-sc.textFile(__dirname + '/james_joyce_ulysse.txt')
+sc.textFile(__dirname + '/james_joyce_ulysses.txt')
 	.flatMap(line => line.split(' '))
 	.map(word => [word, 1])
 	.reduceByKey((a, b) => a + b, 0)
