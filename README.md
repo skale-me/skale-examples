@@ -20,8 +20,8 @@ Then navigate to one of the example folders and install dependencies
 
 Finally, run the sample app
 
-	skale run // To run it on the skale cloud
-	skale test // If you have skale-engine running locally
+	skale run # To run it on the skale cloud
+	skale test # If you have skale-engine running locally
 
 ### Examples
 #### wordcount
