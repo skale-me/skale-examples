@@ -37,10 +37,10 @@ function featurize(data, metadata) {
 		// metadata.education.indexOf(data[3]),			// education (redundant with education-num)
 		Number(data[4]),								// 4 education-num
 		metadata.maritalstatus.indexOf(data[5]),		// 5 marital-status
-		metadata.occupation.indexOf(data[6]),			// 6 occupation	
-		metadata.relationship.indexOf(data[7]),			// 7 relationship	
+		metadata.occupation.indexOf(data[6]),			// 6 occupation
+		metadata.relationship.indexOf(data[7]),			// 7 relationship
 		metadata.race.indexOf(data[8]),					// 8 race
-		metadata.sex.indexOf(data[9]),					// 9 sex	
+		metadata.sex.indexOf(data[9]),					// 9 sex
 		Number(data[10]),								// 10 capital-gain
 		Number(data[11]),								// 11 capital-loss
 		Number(data[12]),								// 12 hours-per-week
@@ -60,7 +60,7 @@ var test_set = sc.textFile('adult.test')
 	.filter(data => data.indexOf('?') == -1)					// remove incomplete data
 	.map(featurize, metadata);									// transform string data to number
 
-// Wrap asynchronous code in co to limit callback imbrications (ES7 async/await will fix this !)
+// Wrap asynchronous code in co to limit callback hell (ES7 async/await will fix this!)
 co(function* () {
 	// Standardize features to zero mean and unit variance
 	var scaler = new StandardScaler();
@@ -98,8 +98,8 @@ co(function* () {
 	data['regParam: ' + parameters.regParam + ', stepSize: ' + parameters.stepSize] = xy;
 	data['Random'] = {0 :0, 1 : 1};
 	plot({
-		title: 'Logistic Regression ROC Curve', 
-		data: data, 
+		title: 'Logistic Regression ROC Curve',
+		data: data,
 		filename: 'roc.png',
 		finish: function() {sc.end();}
 	});
